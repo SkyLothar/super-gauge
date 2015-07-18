@@ -1,5 +1,5 @@
-Supervisor Gaguer EventListeners
-================================
+Supervisor Gaguer Event Listeners
+=================================
 
 Version
 -------
