@@ -2,5 +2,6 @@ requests>=2.7.0
 psutil>=3.1.1
 docker-py>=1.3.0
 PyYAML==3.11
+click>=4.1
 
 git+https://github.com/supervisor/supervisor.git

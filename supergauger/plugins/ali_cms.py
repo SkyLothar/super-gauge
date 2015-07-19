@@ -59,14 +59,15 @@ class AliCms(object):
                 metricName=key,
                 value=val,
                 unit=self.UNITS[unit],
-                timestamp=int(timestamp * 1000),
+                timestamp=timestamp,
                 dimensions=dimensions
             )
             for key, val, unit in raw_metrics
         ]
         return json.dumps(metrics)
 
-    def send(self, timestamp, raw_metrics, raw_dimensions):
+    def send(self, localtime, raw_metrics, raw_dimensions):
+        timestamp = int(localtime * 1000)
         metrics = self.get_metrics(timestamp, raw_metrics, raw_dimensions)
         res = self.session.post(
             self.URL,

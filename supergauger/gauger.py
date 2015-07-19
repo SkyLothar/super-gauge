@@ -1,12 +1,8 @@
-import os
-
 import docker
 import psutil
-import supervisor.childutils
 
 from . import consts
 from . import utils
-from . import plugins
 from .unit import unit
 
 
@@ -19,42 +15,17 @@ class Gauger(object):
         connections=(lambda proc: len(proc.connections()), unit.count)
     )
 
-    def __init__(self, config):
+    def __init__(self, supervisor_client, config):
         self._docker = None
-        self._supervisor = None
-        self._plugins = []
+        self._supervisor = supervisor_client
 
-        self.docker = config["docker"]
-        self.supervisor = config["supervisor"]
-        self.plugins = config["plugins"]
-
-    @property
-    def plugins(self):
-        return self._plugins[:]
-
-    @plugins.setter
-    def plugins(self, config):
-        for plugin_name, plugin_params in config.items():
-            self._plugins.append(plugins.get(plugin_name, plugin_params))
-        return self._plugins[:]
+        docker_config = config.get("docker")
+        if docker_config:
+            self.docker = docker_config
 
     @property
     def supervisor(self):
         return self._supervisor
-
-    @supervisor.setter
-    def supervisor(self, config):
-        config.update({
-            key: val
-            for key, val in os.environ.items()
-            if key.startswith("SUPERVISOR_")
-        })
-        rpc = supervisor.childutils.getRPCInterface(config)
-        rpc.supervisor.getState()
-        state = rpc.supervisor.getState().get("statename")
-        if state != "RUNNING":
-            raise ValueError("can not talk to supervisor server")
-        self._supervisor = rpc.supervisor
 
     @property
     def docker(self):
@@ -82,7 +53,7 @@ class Gauger(object):
                 proc = psutil.Process(pid)
         return proc
 
-    def get_metric(self, proc_name):
+    def get_metrics(self, proc_name):
         proc = self.get_proc(proc_name)
         if proc is None:
             return None

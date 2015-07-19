@@ -55,6 +55,7 @@ target/
 
 # vim
 .ropeproject
+.*.sw*
 
 # config
 config.yml
