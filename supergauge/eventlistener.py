@@ -1,23 +1,25 @@
 import os
 import time
+import logging
+
 
 import click
 import supervisor.childutils
+import yaml
 
-from .gauger import Gauger
+from .gauge import Gauge
 from . import consts
 from . import plugins
 
 
-class SuperGauger(object):
+class SuperGauge(object):
     def __init__(self, config):
-        self._gauger = None
         self._supervisor = None
         self._plugins = []
 
         self.plugins = config["plugins"]
         self.supervisor = config["supervisor"]
-        self._gauger = Gauger(self.supervisor, config)
+        self._gauge = Gauge(self.supervisor, config)
 
     @property
     def supervisor(self):
@@ -39,8 +41,8 @@ class SuperGauger(object):
         return self._supervisor
 
     @property
-    def gauger(self):
-        return self._gauger
+    def gauge(self):
+        return self._gauge
 
     @property
     def plugins(self):
@@ -67,8 +69,8 @@ class SuperGauger(object):
         localtime = time.time()
         collected = [
             (
-                self.gauger.get_metrics(proc_name),
-                self.gauger.get_dimensions(proc_name)
+                self.gauge.get_metrics(proc_name),
+                self.gauge.get_dimensions(proc_name)
             )
             for proc_name in self.procs
         ]
@@ -85,10 +87,11 @@ class SuperGauger(object):
 @click.command()
 @click.argument("config_yml", type=click.File("rb"))
 def runforever(config_yml):
-    config = yaml.load(config)
+    config = yaml.load(config_yml)
     logger = logging.getLogger(__name__)
+    # TODO: set logging level and outputs
 
-    sg = SuperGauger(config)
+    sg = SuperGauge(config)
 
     while True:
         headers, payload = supervisor.childutils.listener.wait()
@@ -97,7 +100,7 @@ def runforever(config_yml):
             supervisor.childutils.listener.ok()
             return False
 
-        failed = gauger.run()
+        failed = sg.run()
         if failed:
             logger.error(
                 "failed to send metric to following plugins: {0}".format(

@@ -6,7 +6,7 @@ from . import utils
 from .unit import unit
 
 
-class Gauger(object):
+class Gauge(object):
     METRICS = dict(
         mem_rss=(lambda proc: utils.to_mb(proc.memory_info().rss), unit.mb),
         mem_vms=(lambda proc: utils.to_mb(proc.memory_info().vms), unit.mb),

@@ -1,4 +1,4 @@
-Supervisor Gaguer Event Listeners
+Supervisor Gague Event Listeners
 =================================
 
 Version
