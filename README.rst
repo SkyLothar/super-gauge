@@ -13,7 +13,8 @@ Supported Backend
 How to Use
 ----------
 put following snippet in your supervisor config file
-.. code:block:: ini
+
+.. code-block:: ini
 
     [eventlistener:supergauge]
     command=supergauge
