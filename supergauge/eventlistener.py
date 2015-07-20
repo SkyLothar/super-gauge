@@ -1,6 +1,7 @@
 import os
 import time
 import logging
+import logging.config
 
 
 import click
@@ -10,6 +11,9 @@ import yaml
 from .gauge import Gauge
 from . import consts
 from . import plugins
+
+
+logger = logging.getLogger(__name__)
 
 
 class SuperGauge(object):
@@ -93,17 +97,20 @@ class SuperGauge(object):
 @click.argument("config_yml", type=click.File("rb"))
 def runforever(config_yml):
     config = yaml.load(config_yml)
-    logger = logging.getLogger(__name__)
-    # TODO: set logging level and outputs
+    logging.config.dictConfig(config["logging"])
 
     sg = SuperGauge(config)
 
     while True:
+        logger.info("waiting for event...")
         headers, payload = supervisor.childutils.listener.wait()
+        logger.info("got new event: {0}".format(headers))
 
-        if not sg.is_subscribed(headers["eventname"]):
+        event = headers["eventname"]
+        if not sg.is_subscribed(event):
+            logger.info("skip unsubscribed event: {0}".format(event))
             supervisor.childutils.listener.ok()
-            return False
+            continue
 
         failed = sg.run()
         if failed:
@@ -112,3 +119,6 @@ def runforever(config_yml):
                     failed
                 )
             )
+        else:
+            logger.info("all metrics send to plugins")
+        supervisor.childutils.listener.ok()
