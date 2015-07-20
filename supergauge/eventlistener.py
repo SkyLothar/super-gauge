@@ -56,11 +56,16 @@ class SuperGauge(object):
 
     @property
     def procs(self):
-        return [
-            proc["name"]
-            for proc in self.supervisor.getAllProcessInfo()
-            if proc["statename"] == consts.RUNNING
-        ]
+        procs = []
+        for proc in self.supervisor.getAllProcessInfo():
+            if proc["statename"] != consts.RUNNING:
+                continue
+            name = proc["name"]
+            group = proc["group"]
+            if name != group:
+                name = "{0}:{1}".format(group, name)
+            procs.append(name)
+        return procs
 
     def is_subscribed(self, event):
         return event.startswith("TICK_")
