@@ -3,7 +3,7 @@ Supervisor Gague Event Listeners
 
 Version
 -------
-v0.0.1
+v0.0.2
 
 Supported Backend
 -----------------
