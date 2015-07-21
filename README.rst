@@ -14,7 +14,7 @@ How to Use
 ----------
 create a config file
 
-.. code-block: yaml
+.. code-block:: yaml
 
     docker:
         version: auto
