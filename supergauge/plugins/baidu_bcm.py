@@ -11,11 +11,15 @@ class BaiduBcm(object):
     URL_FMT = "http://bcm.bj.baidubce.com/json-api/v1/metricdata/{0}/{1}"
     TIME_FMT = "%Y-%m-%dT%H:%M:%SZ"
 
-    def __init__(self, user_id, scope):
+    def __init__(self, access_key, secret_key, user_id, scope):
         self._user_id = user_id
         self._url = self.URL_FMT.format(user_id, scope)
         self._session = requests.session()
         self._session.auth = bceauth.AuthV1(access_key, secret_key)
+
+    @property
+    def session(self):
+        return self._session
 
     @property
     def url(self):
@@ -38,7 +42,7 @@ class BaiduBcm(object):
             )
             for key, val, __ in raw_metrics
         ]
-        return metrics
+        return dict(metricData=metrics)
 
     def send(self, localtime, raw_metrics, raw_dimensions):
         gmt = time.gmtime(localtime)
